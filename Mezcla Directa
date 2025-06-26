@@ -1,1 +1,182 @@
+#include <iostream>
+#include <fstream>
+#include <chrono>
+#include <cstdlib>
+
+using namespace std;
+using namespace std::chrono;
+
+const string RUTA = "C:\\Users\\isaac\\Desktop\\Estructura de datos programas\\Codigos de informe\\Mezcla Directa\\";
+
+void generarDatos(int datos[], int tam, int tipo)
+{
+    switch (tipo)
+    {
+        case 1: // Casi ordenado
+            for (int i = 0; i < tam; i++)
+                datos[i] = i + rand() % 5;
+            break;
+        case 2: // Reverso
+            for (int i = 0; i < tam; i++)
+                datos[i] = tam - i;
+            break;
+        case 3: // Aleatorio
+            for (int i = 0; i < tam; i++)
+                datos[i] = rand() % (tam * 2);
+            break;
+    }
+}
+
+void intercambiar(int a[], int i, int j)
+{
+    int aux = a[i];
+    a[i] = a[j];
+    a[j] = aux;
+}
+
+void ordenarIntercambioSimple(int a[], int n)
+{
+    for (int i = 0; i < n - 1; i++)
+    {
+        for (int j = i + 1; j < n; j++)
+        {
+            if (a[i] > a[j])
+                intercambiar(a, i, j);
+        }
+    }
+}
+
+void realizarMezclaDirecta(int tam)
+{
+    int longitud = 1;
+
+    while (longitud < tam)
+    {
+        ifstream entrada(RUTA + "F.txt");
+        ofstream f1(RUTA + "F1.txt");
+        ofstream f2(RUTA + "F2.txt");
+
+        bool alternar = true;
+        int* bloque = new int[longitud];
+        int numero;
+
+        while (entrada >> numero)
+        {
+            bloque[0] = numero;
+            int cantidad = 1;
+
+            for (int i = 1; i < longitud && entrada >> numero; i++)
+                bloque[cantidad++] = numero;
+
+            ordenarIntercambioSimple(bloque, cantidad);
+
+            for (int i = 0; i < cantidad; i++)
+            {
+                if (alternar)
+                    f1 << bloque[i] << " ";
+                else
+                    f2 << bloque[i] << " ";
+            }
+
+            alternar = !alternar;
+        }
+
+        delete[] bloque;
+        entrada.close();
+        f1.close();
+        f2.close();
+
+        ifstream archivo1(RUTA + "F1.txt");
+        ifstream archivo2(RUTA + "F2.txt");
+        ofstream salida(RUTA + "F.txt");
+
+        int* b1 = new int[longitud];
+        int* b2 = new int[longitud];
+        int n1 = 0, n2 = 0;
+
+        while (true)
+        {
+            n1 = 0;
+            for (int i = 0; i < longitud && archivo1 >> b1[i]; i++)
+                n1++;
+
+            n2 = 0;
+            for (int i = 0; i < longitud && archivo2 >> b2[i]; i++)
+                n2++;
+
+            if (n1 == 0 && n2 == 0)
+                break;
+
+            int i = 0, j = 0;
+            while (i < n1 && j < n2)
+            {
+                if (b1[i] <= b2[j])
+                    salida << b1[i++] << " ";
+                else
+                    salida << b2[j++] << " ";
+            }
+
+            while (i < n1) salida << b1[i++] << " ";
+            while (j < n2) salida << b2[j++] << " ";
+        }
+
+        delete[] b1;
+        delete[] b2;
+        archivo1.close();
+        archivo2.close();
+        salida.close();
+
+        longitud *= 2;
+    }
+}
+
+void crearArchivoOriginal(int datos[], int tam)
+{
+    ofstream archivo(RUTA + "F.txt");
+    for (int i = 0; i < tam; i++)
+        archivo << datos[i] << " ";
+    archivo.close();
+}
+
+void mostrarArchivo(const string& nombre)
+{
+    ifstream archivo(nombre);
+    int numero;
+    while (archivo >> numero)
+    {
+        cout << numero << " ";
+    }
+    cout << endl;
+    archivo.close();
+}
+
+int main()
+{
+    int tam, tipo;
+    cout << "Tamanio del arreglo (100, 1000, 10000): ";
+    cin >> tam;
+
+    cout << "Tipo de datos:\n1. Casi ordenado\n2. Reverso\n3. Aleatorio\nSeleccione opcion: ";
+    cin >> tipo;
+
+    int* datos = new int[tam];
+    generarDatos(datos, tam, tipo);
+    crearArchivoOriginal(datos, tam);
+
+    cout << "\n Contenido del archivo original:\n";
+    mostrarArchivo(RUTA + "F.txt");
+
+    auto inicio = high_resolution_clock::now();
+    realizarMezclaDirecta(tam);
+    auto fin = high_resolution_clock::now();
+    auto duracion = duration_cast<microseconds>(fin - inicio).count();
+
+    cout << "\n Contenido del archivo ordenado:\n";
+    mostrarArchivo(RUTA + "F.txt");
+
+    cout << "\n Tiempo de ordenamiento (mezcla directa): " << duracion << " microsegundos.\n";
+
+    delete[] datos;
+    return 0;
+}
 
