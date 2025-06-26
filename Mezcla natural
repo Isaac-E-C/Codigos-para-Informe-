@@ -1,1 +1,182 @@
+#include <iostream>
+#include <fstream>
+#include <chrono>
+#include <cstdlib>
+using namespace std;
+using namespace std::chrono;
 
+const string RUTA = "C:\\Users\\isaac\\Desktop\\Estructura de datos programas\\Codigos de informe\\Mezcla Natural\\";
+
+void generarDatos(int datos[], int tam, int tipo)
+{
+    switch(tipo)
+    {
+        case 1:
+            for(int i = 0; i < tam; i++)
+                datos[i] = i + rand() % 5;
+            break;
+        case 2:
+            for(int i = 0; i < tam; i++)
+                datos[i] = tam - i;
+            break;
+        case 3:
+            for(int i = 0; i < tam; i++)
+                datos[i] = rand() % (tam * 2);
+            break;
+    }
+}
+
+void intercambiar(int a[], int i, int j)
+{
+    int aux = a[i];
+    a[i] = a[j];
+    a[j] = aux;
+}
+
+void realizarMezclaNatural()
+{
+    bool terminado = false;
+    int numero, anterior;
+
+    while (!terminado)
+    {
+        ifstream entrada(RUTA + "F.txt");
+        ofstream f1(RUTA + "F1.txt");
+        ofstream f2(RUTA + "F2.txt");
+
+        bool aF1 = true;
+        bool huboCambioDeRun = false;
+
+        if (!(entrada >> anterior)) return;
+
+        ofstream& destinoInicial = aF1 ? f1 : f2;
+        destinoInicial << anterior << " ";
+
+        while (entrada >> numero)
+        {
+            if (numero < anterior)
+            {
+                aF1 = !aF1;
+                huboCambioDeRun = true;
+            }
+
+            ofstream& destino = aF1 ? f1 : f2;
+            destino << numero << " ";
+
+            anterior = numero;
+        }
+
+        entrada.close();
+        f1.close();
+        f2.close();
+
+        if (!huboCambioDeRun)
+        {
+            terminado = true;
+            break;
+        }
+
+        ifstream archivo1(RUTA + "F1.txt");
+        ifstream archivo2(RUTA + "F2.txt");
+        ofstream salida(RUTA + "F.txt");
+
+        int a[100], b[100];
+        int na = 0, nb = 0;
+
+        while (true)
+        {
+            if (archivo1 >> numero)
+            {
+                a[0] = numero;
+                na = 1;
+                while (na < 100 && archivo1 >> numero && numero >= a[na - 1])
+                    a[na++] = numero;
+            }
+            else na = 0;
+
+            if (archivo2 >> numero)
+            {
+                b[0] = numero;
+                nb = 1;
+                while (nb < 100 && archivo2 >> numero && numero >= b[nb - 1])
+                    b[nb++] = numero;
+            }
+            else nb = 0;
+
+            if (na == 0 && nb == 0)
+                break;
+
+            int i = 0, j = 0;
+            while (i < na && j < nb)
+            {
+                if (a[i] <= b[j])
+                    salida << a[i++] << " ";
+                else
+                    salida << b[j++] << " ";
+            }
+            while (i < na) salida << a[i++] << " ";
+            while (j < nb) salida << b[j++] << " ";
+        }
+
+        archivo1.close();
+        archivo2.close();
+        salida.close();
+    }
+}
+
+void mostrarArchivo(const string& nombre, int limite = 100)
+{
+    ifstream archivo(nombre);
+    int numero, cont = 0;
+
+    while (archivo >> numero && cont < limite)
+    {
+        cout << numero << " ";
+        cont++;
+    }
+
+    if (cont == limite)
+        cout << "... (truncado)\n";
+    else
+        cout << endl;
+
+    archivo.close();
+}
+
+void crearArchivoOriginal(int datos[], int tam)
+{
+    ofstream archivo(RUTA + "F.txt");
+    for (int i = 0; i < tam; i++)
+        archivo << datos[i] << " ";
+    archivo.close();
+}
+
+int main()
+{
+    int tam, tipo;
+    cout << "Tamanio del arreglo (100, 1000, 10000): ";
+    cin >> tam;
+
+    cout << "Tipo de datos:\n 1. Casi ordenado\n 2. Reverso\n 3. Aleatorio\nSeleccione opcion: ";
+    cin >> tipo;
+
+    int* datos = new int[tam];
+    generarDatos(datos, tam, tipo);
+    crearArchivoOriginal(datos, tam);
+
+    cout << "\nContenido original (hasta 100 elementos):\n";
+    mostrarArchivo(RUTA + "F.txt");
+
+    auto inicio = high_resolution_clock::now();
+    realizarMezclaNatural();
+    auto fin = high_resolution_clock::now();
+
+    auto duracion = duration_cast<microseconds>(fin - inicio).count();
+    cout << "\n Contenido ordenado (hasta 100 elementos):\n";
+    mostrarArchivo(RUTA + "F.txt");
+
+    cout << "\n Tiempo de ordenamiento (mezcla natural): " << duracion << " microsegundos.\n";
+
+    delete[] datos;
+    return 0;
+}
