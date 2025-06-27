@@ -1,1 +1,125 @@
+#include <iostream>
+#include <chrono>
+#include <cstdlib>
+using namespace std;
+using namespace std::chrono;
+
+long long comparaciones = 0;
+long long asignaciones = 0;
+
+void generarDatos(int arr[], int tam, int tipo)
+{
+    switch (tipo)
+    {
+    case 1: // Casi ordenado
+        for (int i = 0; i < tam; i++)
+            arr[i] = i + (i % 5);
+        break;
+    case 2: // Reverso
+        for (int i = 0; i < tam; i++)
+            arr[i] = tam - i;
+        break;
+    case 3: // Aleatorio
+        for (int i = 0; i < tam; i++)
+            arr[i] = (i * 7919 + 12345) % (tam * 2);
+        break;
+    }
+}
+
+void mostrarArreglo(int arr[], int n)
+{
+    for (int i = 0; i < n; i++)
+        cout << arr[i] << " ";
+    cout << endl;
+}
+
+int getMax(int arr[], int n)
+{
+    int maxVal = arr[0];
+    for (int i = 1; i < n; i++)
+    {
+        comparaciones++;
+        if (arr[i] > maxVal)
+        {
+            maxVal = arr[i];
+            asignaciones++;
+        }
+    }
+    return maxVal;
+}
+
+void countingSort(int arr[], int n, int exp)
+{
+    int output[n];
+    int count[10] = {0};
+
+    for (int i = 0; i < n; i++)
+    {
+        int digito = (arr[i] / exp) % 10;
+        count[digito]++;
+        asignaciones++;
+    }
+
+    for (int i = 1; i < 10; i++)
+    {
+        count[i] += count[i - 1];
+        asignaciones++;
+    }
+
+    for (int i = n - 1; i >= 0; i--)
+    {
+        int digito = (arr[i] / exp) % 10;
+        output[count[digito] - 1] = arr[i];
+        count[digito]--;
+        asignaciones += 2;
+    }
+
+    for (int i = 0; i < n; i++)
+    {
+        arr[i] = output[i];
+        asignaciones++;
+    }
+}
+
+void radixSort(int arr[], int n)
+{
+    int maxVal = getMax(arr, n);
+    for (int exp = 1; maxVal / exp > 0; exp *= 10)
+    {
+        comparaciones++;
+        countingSort(arr, n, exp);
+    }
+}
+
+int main()
+{
+    int tam, tipo;
+    cout << "Tamaño del arreglo (100, 1000, 10000): ";
+    cin >> tam;
+
+    cout << "Tipo de datos:\n";
+    cout << "1. Casi ordenado\n2. Reverso\n3. Aleatorio\nSeleccione opción: ";
+    cin >> tipo;
+
+    int* arr = new int[tam];
+    generarDatos(arr, tam, tipo);
+
+    cout << "\nArreglo original:\n";
+    mostrarArreglo(arr, tam);
+
+    auto inicio = high_resolution_clock::now();
+    radixSort(arr, tam);
+    auto fin = high_resolution_clock::now();
+
+    long long duracion = duration_cast<microseconds>(fin - inicio).count();
+
+    cout << "\nArreglo ordenado:\n";
+    mostrarArreglo(arr, tam);
+    cout << "\nTiempo de ordenamiento (RadixSort): " << duracion << " microsegundos.\n";
+    cout << "Comparaciones: " << comparaciones << "\n";
+    cout << "Asignaciones: " << asignaciones << "\n";
+
+    delete[] arr;
+    return 0;
+}
 
