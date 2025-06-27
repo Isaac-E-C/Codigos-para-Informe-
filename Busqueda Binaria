@@ -1,1 +1,93 @@
+#include <iostream>
+#include <chrono>
+#include <cstdlib>
+using namespace std;
+using namespace std::chrono;
 
+
+template <typename T>
+void ordenarBurbuja(T arr[], int n, long long &comparaciones, long long &asignaciones) {
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = 0; j < n - i - 1; j++) {
+            comparaciones++;
+            if (arr[j] > arr[j + 1]) {
+                T temp = arr[j];
+                arr[j] = arr[j + 1];
+                arr[j + 1] = temp;
+                asignaciones += 3;
+            }
+        }
+    }
+}
+
+
+template <typename T>
+bool busquedaBinaria(T arr[], int n, T clave, long long &comparaciones) {
+    int izquierda = 0, derecha = n - 1;
+    while (izquierda <= derecha) {
+        int medio = (izquierda + derecha) / 2;
+        comparaciones++;
+        if (arr[medio] == clave)
+            return true;
+        else if (arr[medio] < clave)
+            izquierda = medio + 1;
+        else
+            derecha = medio - 1;
+    }
+    return false;
+}
+
+int main() {
+    int* arreglo = nullptr;
+    int n, tipo, valor;
+    long long compOrden = 0, asignaciones = 0, compBusqueda = 0;
+
+    cout << "BUSQUEDA BINARIA (con ordenamiento burbuja)\n";
+    cout << "Tamaño del arreglo (100, 1000, 10000): ";
+    cin >> n;
+    cout << "Tipo de datos:\n1. Casi ordenado\n2. Reverso\n3. Aleatorio\nSeleccione opcion: ";
+    cin >> tipo;
+
+    arreglo = new int[n];
+
+
+    auto inicioGen = steady_clock::now();
+    for (int i = 0; i < n; i++) {
+        switch (tipo) {
+            case 1: arreglo[i] = i + (i % 5); break;          // Casi ordenado
+            case 2: arreglo[i] = n - i; break;                // Reverso
+            case 3: arreglo[i] = (i * 7919 + 12345) % (n * 2); break; // Aleatorio
+        }
+    }
+    auto finGen = steady_clock::now();
+
+    cout << "\nArreglo generado:\n";
+    for (int i = 0; i < n; i++) cout << arreglo[i] << " ";
+    cout << "\nTiempo de generacion: " << duration_cast<microseconds>(finGen - inicioGen).count() << " microsegundos\n";
+
+
+    auto inicioOrden = steady_clock::now();
+    ordenarBurbuja(arreglo, n, compOrden, asignaciones);
+    auto finOrden = steady_clock::now();
+
+
+    cout << "\nArreglo ordenado:\n";
+    for (int i = 0; i < n; i++) cout << arreglo[i] << " ";
+    cout << endl;
+
+    cout << "\nIngrese valor a buscar: ";
+    cin >> valor;
+
+    auto inicioBusq = steady_clock::now();
+    bool encontrado = busquedaBinaria(arreglo, n, valor, compBusqueda);
+    auto finBusq = steady_clock::now();
+
+    cout << (encontrado ? "Valor encontrado.\n" : "Valor no encontrado.\n");
+    cout << "Tiempo de ordenamiento: " << duration_cast<microseconds>(finOrden - inicioOrden).count() << " microsegundos\n";
+    cout << "Comparaciones en ordenamiento: " << compOrden << " - Asignaciones: " << asignaciones << endl;
+    cout << "Tiempo de busqueda: " << duration_cast<microseconds>(finBusq - inicioBusq).count() << " microsegundos\n";
+    cout << "Comparaciones en busqueda: " << compBusqueda << endl;
+
+    delete[] arreglo;
+    return 0;
+}
