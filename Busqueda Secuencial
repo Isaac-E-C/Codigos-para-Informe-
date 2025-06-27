@@ -1,1 +1,59 @@
+#include <iostream>
+#include <chrono>
+#include <cstdlib>
+using namespace std;
+using namespace std::chrono;
+
+template <typename T>
+bool busquedaSecuencial(T arr[], int n, T clave, long long &comparaciones) {
+    for (int i = 0; i < n; i++) {
+        comparaciones++;
+        if (arr[i] == clave)
+            return true;
+    }
+    return false;
+}
+
+int main() {
+    int* arreglo = nullptr;
+    int n, tipo, valor;
+    long long comparaciones = 0;
+
+    cout << "BUSQUEDA SECUENCIAL\n";
+    cout << "Tamanio del arreglo (100, 1000, 10000): ";
+    cin >> n;
+    cout << "Tipo de datos:\n1. Casi ordenado\n2. Reverso\n3. Aleatorio\nSeleccione opcion: ";
+    cin >> tipo;
+
+    arreglo = new int[n];
+    auto inicioGen = steady_clock::now();
+    for (int i = 0; i < n; i++) {
+        switch (tipo) {
+            case 1: arreglo[i] = i + (i % 5); break;
+            case 2: arreglo[i] = n - i; break;
+            case 3: arreglo[i] = (i * 7919 + 12345) % (n * 2); break;
+        }
+    }
+    auto finGen = steady_clock::now();
+
+    cout << "Arreglo generado:\n";
+    for (int i = 0; i < n; i++) cout << arreglo[i] << " ";
+    cout << "\nTiempo de generacion: " << duration_cast<microseconds>(finGen - inicioGen).count() << " microsegundos\n";
+
+    cout << "\nIngrese valor a buscar: ";
+    cin >> valor;
+
+    comparaciones = 0;
+    auto inicio = steady_clock::now();
+    bool encontrado = busquedaSecuencial(arreglo, n, valor, comparaciones);
+    auto fin = steady_clock::now();
+
+    // Forzar uso del resultado
+    cout << (encontrado ? "Valor encontrado.\n" : "Valor no encontrado.\n");
+    cout << "Tiempo de busqueda: " << duration_cast<microseconds>(fin - inicio).count() << " microsegundos\n";
+    cout << "Comparaciones: " << comparaciones << endl;
+
+    delete[] arreglo;
+    return 0;
+}
 
