@@ -1,1 +1,136 @@
+#include <iostream>
+#include <chrono>
 
+using namespace std;
+using namespace std::chrono;
+
+long long comparaciones = 0;
+long long asignaciones = 0;
+
+void generarDatos(int datos[], int tam, int tipo)
+{
+    switch (tipo)
+    {
+    case 1: 
+        for (int i = 0; i < tam; i++)
+            datos[i] = i + (i % 5);
+        break;
+    case 2: 
+        for (int i = 0; i < tam; i++)
+            datos[i] = tam - i;
+        break;
+    case 3: 
+        for (int i = 0; i < tam; i++)
+            datos[i] = (i * 7919 + 12345) % (tam * 2); 
+        break;
+    }
+}
+
+void insertionSort(int arr[], int n)
+{
+    for (int i = 1; i < n; i++)
+    {
+        int key = arr[i];
+        int j = i - 1;
+        asignaciones++;
+
+        while (j >= 0 && arr[j] > key)
+        {
+            comparaciones++;
+            arr[j + 1] = arr[j];
+            j--;
+            asignaciones++;
+        }
+        comparaciones++;
+        arr[j + 1] = key;
+        asignaciones++;
+    }
+}
+
+void bucketSort(int arr[], int n)
+{
+    int max = arr[0];
+    for (int i = 1; i < n; i++)
+    {
+        comparaciones++;
+        if (arr[i] > max)
+        {
+            max = arr[i];
+            asignaciones++;
+        }
+    }
+
+    int bucketCount = n / 10 + 1;
+    int** buckets = new int*[bucketCount];
+    int* sizes = new int[bucketCount];
+    for (int i = 0; i < bucketCount; i++)
+    {
+        buckets[i] = new int[n];
+        sizes[i] = 0;
+    }
+
+    for (int i = 0; i < n; i++)
+    {
+        int index = (arr[i] * bucketCount) / (max + 1);
+        buckets[index][sizes[index]++] = arr[i];
+        asignaciones++;
+    }
+
+    int idx = 0;
+    for (int i = 0; i < bucketCount; i++)
+    {
+        if (sizes[i] > 0)
+        {
+            insertionSort(buckets[i], sizes[i]);
+            for (int j = 0; j < sizes[i]; j++)
+            {
+                arr[idx++] = buckets[i][j];
+                asignaciones++;
+            }
+        }
+    }
+
+    for (int i = 0; i < bucketCount; i++)
+        delete[] buckets[i];
+    delete[] buckets;
+    delete[] sizes;
+}
+
+void mostrar(int arr[], int n)
+{
+    for (int i = 0; i < n; i++)
+        cout << arr[i] << " ";
+    cout << endl;
+}
+
+int main()
+{
+    int tam, tipo;
+    cout << "Ingrese tamano del arreglo (100, 1000, 10000): ";
+    cin >> tam;
+
+    cout << "Tipo de datos:\n1. Casi ordenado\n2. Reverso\n3. Aleatorio\nSeleccione: ";
+    cin >> tipo;
+
+    int* datos = new int[tam];
+    generarDatos(datos, tam, tipo);
+
+    cout << "\nDatos originales:\n";
+    mostrar(datos, tam);
+
+    auto inicio = steady_clock::now();
+    bucketSort(datos, tam);
+    auto fin = steady_clock::now();
+
+    auto duracion = duration_cast<microseconds>(fin - inicio).count();
+
+    cout << "\nDatos ordenados (Bucket Sort):\n";
+    mostrar(datos, tam);
+
+    cout << "\nTiempo: " << duracion << " microsegundos\n";
+    cout << "Comparaciones: " << comparaciones << "\n";
+    cout << "Asignaciones: " << asignaciones << "\n";
+
+    delete[] datos;
+    return 0;
+}
