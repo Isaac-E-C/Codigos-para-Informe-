@@ -1,1 +1,133 @@
+#include <iostream>
+#include <chrono>
+#include <cstdlib>
+using namespace std;
+using namespace std::chrono;
+
+const int TAM_TABLA = 1031;
+
+template <typename T>
+class TablaHash {
+    T tabla[TAM_TABLA];
+    bool ocupado[TAM_TABLA];
+    long long colisiones;
+    long long comparaciones;
+
+public:
+    TablaHash() {
+        for (int i = 0; i < TAM_TABLA; i++) ocupado[i] = false;
+        colisiones = 0;
+        comparaciones = 0;
+    }
+
+    int hashFunc(T clave) {
+        return clave % TAM_TABLA;
+    }
+
+    void insertar(T clave) {
+        int pos = hashFunc(clave);
+        while (ocupado[pos]) {
+            colisiones++;
+            pos = (pos + 1) % TAM_TABLA;
+        }
+        tabla[pos] = clave;
+        ocupado[pos] = true;
+    }
+
+    bool buscar(T clave, long long& compBusqueda) {
+        int pos = hashFunc(clave);
+        int intentos = 0;
+        compBusqueda = 0;
+        while (ocupado[pos] && intentos < TAM_TABLA) {
+            compBusqueda++;
+            comparaciones++;  // total general
+            if (tabla[pos] == clave) return true;
+            pos = (pos + 1) % TAM_TABLA;
+            intentos++;
+        }
+        return false;
+    }
+
+    void mostrar() {
+        cout << "\nContenido tabla hash:\n";
+        for (int i = 0; i < TAM_TABLA; i++) {
+            if (ocupado[i]) cout << i << ": " << tabla[i] << "\n";
+        }
+        cout << "Colisiones totales: " << colisiones << "\n";
+        cout << "Comparaciones totales: " << comparaciones << "\n";
+    }
+};
+
+int main() {
+    TablaHash<int> hash;
+    int n, tipo, opcion, valor;
+
+    cout << "TABLA HASH\n";
+    cout << "Cantidad de elementos a insertar (100, 1000, 10000): ";
+    cin >> n;
+    cout << "Tipo de datos:\n1. Casi ordenado\n2. Reverso\n3. Aleatorio\nSeleccione opcion: ";
+    cin >> tipo;
+
+    // Insertar y medir tiempo de generación
+    auto inicioGen = steady_clock::now();
+    for (int i = 0; i < n; i++) {
+        switch (tipo) {
+            case 1: hash.insertar(i + (i % 5)); break;
+            case 2: hash.insertar(n - i); break;
+            case 3: hash.insertar((i * 7919 + 12345) % (n * 2)); break;
+        }
+    }
+    auto finGen = steady_clock::now();
+
+    cout << "\nElementos insertados en tabla hash.\n";
+    cout << "Tiempo de inserción inicial: " << duration_cast<microseconds>(finGen - inicioGen).count() << " microsegundos\n";
+
+    hash.mostrar();
+
+    do {
+        cout << "\n--- MENU HASH ---\n";
+        cout << "1. Insertar valor\n";
+        cout << "2. Buscar valor\n";
+        cout << "3. Mostrar tabla\n";
+        cout << "4. Salir\n";
+        cout << "Seleccione opcion: ";
+        cin >> opcion;
+
+        switch (opcion) {
+            case 1:
+                cout << "Valor a insertar: ";
+                cin >> valor;
+                hash.insertar(valor);
+                cout << "Valor insertado.\n";
+                break;
+
+            case 2: {
+                cout << "Valor a buscar: ";
+                cin >> valor;
+                long long compBusqueda = 0;
+                auto inicio = steady_clock::now();
+                bool encontrado = hash.buscar(valor, compBusqueda);
+                auto fin = steady_clock::now();
+
+                cout << (encontrado ? "Valor encontrado" : "Valor no encontrado") << ".\n";
+                cout << "Tiempo de búsqueda: " << duration_cast<microseconds>(fin - inicio).count() << " microsegundos\n";
+                cout << "Comparaciones en búsqueda: " << compBusqueda << "\n";
+                break;
+            }
+
+            case 3:
+                hash.mostrar();
+                break;
+
+            case 4:
+                cout << "Saliendo...\n";
+                break;
+
+            default:
+                cout << "Opción inválida. Intente de nuevo.\n";
+        }
+    } while (opcion != 4);
+
+    return 0;
+}
 
