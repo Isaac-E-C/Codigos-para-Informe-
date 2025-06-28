@@ -1,1 +1,117 @@
+#include <iostream>
+#include <chrono>
+#include <cstdlib>
+#include <ctime>
+using namespace std;
+using namespace std::chrono;
+
+int comparaciones = 0;
+int intercambios = 0;
+
+void intercambiar(int &a, int &b) {
+    int temp = a;
+    a = b;
+    b = temp;
+    intercambios++;
+}
+
+int elegirPivote(int arr[], int left, int right, int tipoPivote) {
+    switch (tipoPivote) {
+        case 1: return arr[left];
+        case 2: return arr[right];
+        case 3: return arr[(left + right) / 2];
+        case 4: return arr[left + rand() % (right - left + 1)];
+        default: return arr[right];
+    }
+}
+
+void quicksort(int arr[], int left, int right, int tipoPivote) {
+    int i = left, j = right;
+    int pivot = elegirPivote(arr, left, right, tipoPivote);
+
+    while (i <= j) {
+        while (arr[i] < pivot) {
+            i++;
+            comparaciones++;
+        }
+        while (arr[j] > pivot) {
+            j--;
+            comparaciones++;
+        }
+        if (i <= j) {
+            intercambiar(arr[i], arr[j]);
+            i++;
+            j--;
+        }
+    }
+
+    if (left < j) quicksort(arr, left, j, tipoPivote);
+    if (i < right) quicksort(arr, i, right, tipoPivote);
+}
+
+void mostrar(int arr[], int n) {
+    for (int i = 0; i < n; i++) {
+        cout << arr[i];
+        if (i < n - 1) cout << ", ";
+    }
+    cout << endl;
+}
+
+void generarDatos(int arr[], int n, int tipo) {
+    switch (tipo) {
+        case 1:
+            for (int i = 0; i < n; i++)
+                arr[i] = i + rand() % 5;
+            break;
+        case 2:
+            for (int i = 0; i < n; i++)
+                arr[i] = n - i;
+            break;
+        case 3:
+            for (int i = 0; i < n; i++)
+                arr[i] = rand() % (n * 2);
+            break;
+    }
+}
+
+int main() {
+    srand(time(0));
+
+    int n, tipoDatos, tipoPivote;
+    cout << "Ingrese cantidad de elementos (100 / 1000 / 10000): ";
+    cin >> n;
+
+    cout << "Tipo de datos:\n";
+    cout << "1. Casi ordenado\n2. Reverso\n3. Aleatorio\nSeleccione: ";
+    cin >> tipoDatos;
+
+    cout << "Tipo de pivote:\n";
+    cout << "1. Inicial\n2. Final\n3. Central\n4. Aleatorio\nSeleccione: ";
+    cin >> tipoPivote;
+
+    int* arr = new int[n];
+    generarDatos(arr, n, tipoDatos);
+
+    cout << "\nArreglo original:\n";
+    mostrar(arr, n);
+
+    auto inicio = steady_clock::now();
+    quicksort(arr, 0, n - 1, tipoPivote);
+    auto fin = steady_clock::now();
+
+    volatile int dummy = arr[0]; 
+
+    cout << "\nArreglo ordenado:\n";
+    mostrar(arr, n);
+
+    auto duracion = duration_cast<microseconds>(fin - inicio).count();
+    if (duracion == 0) duracion = 1;
+
+    cout << "\nComparaciones realizadas: " << comparaciones << endl;
+    cout << "Intercambios realizados: " << intercambios << endl;
+    cout << "Tiempo de ejecución: " << duracion << " microsegundos\n";
+
+    delete[] arr;
+    return 0;
+}
 
