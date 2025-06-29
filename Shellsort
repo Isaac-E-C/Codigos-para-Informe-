@@ -11,15 +11,15 @@ void generarDatos(int* array, int tam, int tipo)
 {
     switch (tipo)
     {
-    case 1: // Casi ordenado
+    case 1: 
         for (int i = 0; i < tam; i++)
             array[i] = i + (i % 5);
         break;
-    case 2: // Reverso
+    case 2: 
         for (int i = 0; i < tam; i++)
             array[i] = tam - i;
         break;
-    case 3: // Aleatorio (sin usar rand directamente)
+    case 3: 
         for (int i = 0; i < tam; i++)
             array[i] = (i * 7919 + 12345) % (tam * 2);
         break;
@@ -41,7 +41,7 @@ void shellSort(int* array, int n)
         {
             int temp = array[i];
             int j;
-            asignaciones++; // asignación de temp
+            asignaciones++; 
 
             for (j = i; j >= gap && array[j - gap] > temp; j -= gap)
             {
@@ -50,7 +50,7 @@ void shellSort(int* array, int n)
                 asignaciones++;
             }
 
-            if (j >= gap) comparaciones++; // última comparación falsa
+            if (j >= gap) comparaciones++; 
             array[j] = temp;
             asignaciones++;
         }
@@ -89,4 +89,3 @@ int main()
     delete[] datos;
     return 0;
 }
-
