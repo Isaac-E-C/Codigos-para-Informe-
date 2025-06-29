@@ -9,18 +9,18 @@ const string RUTA = "C:\\Users\\isaac\\Desktop\\Estructura de datos programas\\C
 
 void generarDatos(int datos[], int tam, int tipo)
 {
-    switch(tipo)
+    switch (tipo)
     {
         case 1:
-            for(int i = 0; i < tam; i++)
+            for (int i = 0; i < tam; i++)
                 datos[i] = i + rand() % 5;
             break;
         case 2:
-            for(int i = 0; i < tam; i++)
+            for (int i = 0; i < tam; i++)
                 datos[i] = tam - i;
             break;
         case 3:
-            for(int i = 0; i < tam; i++)
+            for (int i = 0; i < tam; i++)
                 datos[i] = rand() % (tam * 2);
             break;
     }
@@ -124,22 +124,13 @@ void realizarMezclaNatural()
     }
 }
 
-void mostrarArchivo(const string& nombre, int limite = 100)
+void mostrarArchivo(const string& nombre)
 {
     ifstream archivo(nombre);
-    int numero, cont = 0;
-
-    while (archivo >> numero && cont < limite)
-    {
+    int numero;
+    while (archivo >> numero)
         cout << numero << " ";
-        cont++;
-    }
-
-    if (cont == limite)
-        cout << "... (truncado)\n";
-    else
-        cout << endl;
-
+    cout << endl;
     archivo.close();
 }
 
@@ -164,7 +155,7 @@ int main()
     generarDatos(datos, tam, tipo);
     crearArchivoOriginal(datos, tam);
 
-    cout << "\nContenido original (hasta 100 elementos):\n";
+    cout << "\nContenido original:\n";
     mostrarArchivo(RUTA + "F.txt");
 
     auto inicio = high_resolution_clock::now();
@@ -172,10 +163,10 @@ int main()
     auto fin = high_resolution_clock::now();
 
     auto duracion = duration_cast<microseconds>(fin - inicio).count();
-    cout << "\n Contenido ordenado (hasta 100 elementos):\n";
+    cout << "\nContenido ordenado:\n";
     mostrarArchivo(RUTA + "F.txt");
 
-    cout << "\n Tiempo de ordenamiento (mezcla natural): " << duracion << " microsegundos.\n";
+    cout << "\nTiempo de ordenamiento (mezcla natural): " << duracion << " microsegundos.\n";
 
     delete[] datos;
     return 0;
