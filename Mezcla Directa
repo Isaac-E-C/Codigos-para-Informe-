@@ -8,21 +8,33 @@ using namespace std::chrono;
 
 const string RUTA = "C:\\Users\\isaac\\Desktop\\Estructura de datos programas\\Codigos de informe\\Mezcla Directa\\";
 
+long long comparaciones = 0;
+long long asignaciones = 0;
+
 void generarDatos(int datos[], int tam, int tipo)
 {
     switch (tipo)
     {
-        case 1: // Casi ordenado
+        case 1:
             for (int i = 0; i < tam; i++)
+            {
                 datos[i] = i + rand() % 5;
+                asignaciones++;
+            }
             break;
-        case 2: // Reverso
+        case 2:
             for (int i = 0; i < tam; i++)
+            {
                 datos[i] = tam - i;
+                asignaciones++;
+            }
             break;
-        case 3: // Aleatorio
+        case 3:
             for (int i = 0; i < tam; i++)
+            {
                 datos[i] = rand() % (tam * 2);
+                asignaciones++;
+            }
             break;
     }
 }
@@ -32,6 +44,7 @@ void intercambiar(int a[], int i, int j)
     int aux = a[i];
     a[i] = a[j];
     a[j] = aux;
+    asignaciones += 3;
 }
 
 void ordenarIntercambioSimple(int a[], int n)
@@ -40,6 +53,7 @@ void ordenarIntercambioSimple(int a[], int n)
     {
         for (int j = i + 1; j < n; j++)
         {
+            comparaciones++;
             if (a[i] > a[j])
                 intercambiar(a, i, j);
         }
@@ -63,10 +77,14 @@ void realizarMezclaDirecta(int tam)
         while (entrada >> numero)
         {
             bloque[0] = numero;
+            asignaciones++;
             int cantidad = 1;
 
             for (int i = 1; i < longitud && entrada >> numero; i++)
+            {
                 bloque[cantidad++] = numero;
+                asignaciones++;
+            }
 
             ordenarIntercambioSimple(bloque, cantidad);
 
@@ -98,11 +116,17 @@ void realizarMezclaDirecta(int tam)
         {
             n1 = 0;
             for (int i = 0; i < longitud && archivo1 >> b1[i]; i++)
+            {
                 n1++;
+                asignaciones++;
+            }
 
             n2 = 0;
             for (int i = 0; i < longitud && archivo2 >> b2[i]; i++)
+            {
                 n2++;
+                asignaciones++;
+            }
 
             if (n1 == 0 && n2 == 0)
                 break;
@@ -110,6 +134,7 @@ void realizarMezclaDirecta(int tam)
             int i = 0, j = 0;
             while (i < n1 && j < n2)
             {
+                comparaciones++;
                 if (b1[i] <= b2[j])
                     salida << b1[i++] << " ";
                 else
@@ -175,8 +200,11 @@ int main()
     mostrarArchivo(RUTA + "F.txt");
 
     cout << "\n Tiempo de ordenamiento (mezcla directa): " << duracion << " microsegundos.\n";
+    cout << " Comparaciones: " << comparaciones << "\n";
+    cout << " Asignaciones: " << asignaciones << "\n";
 
     delete[] datos;
     return 0;
 }
+
 
